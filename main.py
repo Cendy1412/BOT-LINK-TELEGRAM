@@ -1,11 +1,10 @@
-import imghdr
-from telegram import Update
-from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
 import os
+from telegram import Update
+from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
 
 TOKEN = os.getenv("BOT_TOKEN")
 
-def get_direct_link(update: Update, context: CallbackContext):
+async def get_direct_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     file_obj = None
     file_name = None
 
@@ -20,22 +19,22 @@ def get_direct_link(update: Update, context: CallbackContext):
         file_name = file_obj.file_name or "audio.mp3"
 
     if file_obj:
-        file_id = file_obj.file_id
-        new_file = context.bot.get_file(file_id)
+        new_file = await context.bot.get_file(file_obj.file_id)
         file_link = f"https://api.telegram.org/file/bot{TOKEN}/{new_file.file_path}"
-        update.message.reply_text(f"📂 {file_name}\n🔗 Link tải trực tiếp:\n{file_link}")
+        await update.message.reply_text(f"📂 {file_name}\n🔗 Link tải trực tiếp:\n{file_link}")
     else:
-        update.message.reply_text("❌ Bot chỉ hỗ trợ file/document/video/audio thôi nhé.")
+        await update.message.reply_text("❌ Bot chỉ hỗ trợ file/document/video/audio thôi nhé.")
 
 def main():
-    updater = Updater(TOKEN, use_context=True)
-    dp = updater.dispatcher
-    dp.add_handler(MessageHandler(Filters.document | Filters.video | Filters.audio, get_direct_link))
+    app = ApplicationBuilder().token(TOKEN).build()
 
-    updater.start_polling()
-    print("🤖 Bot đang chạy trên Render...")
-    updater.idle()
+    app.add_handler(MessageHandler(
+        filters.Document.ALL | filters.VIDEO | filters.AUDIO,
+        get_direct_link
+    ))
+
+    print("🤖 Bot đang chạy trên Render (PTB v20)...")
+    app.run_polling()
 
 if __name__ == "__main__":
     main()
-
