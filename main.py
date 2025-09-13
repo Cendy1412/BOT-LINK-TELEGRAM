@@ -11,7 +11,7 @@ async def get_direct_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     file_obj = None
     file_name = None
 
-    if update.message.document:  # tài liệu: rar, zip, exe, pdf, docx, ...
+    if update.message.document:  # rar, zip, exe, pdf, ...
         file_obj = update.message.document
         file_name = file_obj.file_name
     elif update.message.video:   # video
@@ -26,11 +26,10 @@ async def get_direct_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if file_obj:
         new_file = await context.bot.get_file(file_obj.file_id)
-        file_link = f"https://api.telegram.org/file/bot{TOKEN}/{new_file.file_path}"
+        file_link = new_file.file_path  # ✅ dùng trực tiếp, không tự ghép domain
         await update.message.reply_text(f"📂 {file_name}\n🔗 {file_link}")
     else:
-        # Bỏ qua tin nhắn không phải file
-        return
+        return  # không phải file thì bỏ qua
 
 # Fake HTTP server để Render không kill service
 def run_http_server():
