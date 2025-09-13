@@ -1,3 +1,4 @@
+import imghdr
 from telegram import Update
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
 import os
@@ -37,3 +38,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
